@@ -1,0 +1,18 @@
+{
+  "name": "Placar Tático - OP PENITENCIÁRIAS RR",
+  "short_name": "Tiro OP", 
+  "description": "Operações Penitenciárias - RR",
+  "start_url": "/",
+  "display": "standalone",
+  "scope":"/index.html",
+  "background_color": "#000000",
+  "theme_color": "#ff0000",
+  "icons": [
+    
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512", 
+      "type": "image/png"
+    }
+  ]
+}

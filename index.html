@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Placar Tático - OP PENITENCIÁRIAS RR</title>
+
+    <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#FFD700">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="apple-touch-icon" href="./android-chrome-512x512.png">
+<link rel="icon" type="image/png" href="./android-chrome-512x512.png">
+
+    <style>
+        :root { --bg: #0a0f1a; --card: #1e293b; --accent: #dc2626; --text: #f8fafc; --gold: #f59e0b; --border: #475569; --green: #10b981; }
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); padding: 12px; margin: 0; }
+        h1 { font-size: 1.6rem; text-align: center; margin: 8px 0; color: var(--accent); }
+        h2 { font-size: 1.1rem; border-bottom: 2px solid var(--accent); padding-bottom: 8px; color: var(--accent); }
+      .container { max-width: 1200px; margin: 0 auto; }
+      .header { text-align: center; margin-bottom: 20px; }
+      .header img { width: 100px; height: 100px; margin-bottom: 8px; }
+      .header.sub { font-size: 14px; color: #94a3b8; font-weight: bold; letter-spacing: 1px; }
+      .header .alvo-logo {
+        width: 55px;
+        height: 55px;
+        object-fit: contain;
+        filter: drop-shadow(0 0 2px #FFD700);
+        }
+      .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        @media (min-width: 900px) {.grid { grid-template-columns: 1fr 1fr; } }
+      .card { background: rgba(30, 41, 59, 0.9); padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
+      .row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+        @media (min-width: 600px) {.row { flex-direction: row; } }
+      .col { flex: 1; display: flex; flex-direction: column; }
+        label { font-size: 13px; color: #94a3b8; margin-bottom: 4px; font-weight: bold; }
+        input, select, button { background: #334155; border: 1px solid var(--border); color: #fff; padding: 14px; border-radius: 8px; width: 100%; font-size: 16px; min-height: 48px; }
+        button { background: var(--accent); color: #fff; font-weight: bold; cursor: pointer; border: none; margin-top: 8px; }
+      .btn-green { background: var(--green); }
+      .btn-gold { background: var(--gold); color: #0f172a; }
+      .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { padding: 12px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+        th { color: var(--accent); }
+      .rank-1 { color: var(--gold); font-weight: bold; background: rgba(245, 158, 11, 0.1)!important; }
+      .arma-title { font-size: 14px; color: var(--accent); font-weight: bold; margin-top: 16px; border-top: 1px dashed var(--border); padding-top: 10px; }
+        hr { border-color:var(--border); margin:16px 0; }
+        #areaRelatorio { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <!-- TROQUE AQUI: cole o link da sua imagem PNG ou deixe em branco -->
+        <img src="C:\Users\dober\OneDrive\GODOI\Área de Trabalho\MATERIAL PARA INSTRUÇÃO\APH TÁTICO\IMAGENS E VIDEOS PARA APH\Imagem2-removebg-preview (1).png" alt="Brasão OP Penitenciárias RR">
+        <h1>PAINEL DE PONTUAÇÃO TÁTICA</h1>
+        <div class="sub">OPERAÇÕES PENITENCIÁRIAS - POLÍCIA PENAL RR</div>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>🎯 Gerenciamento</h2>
+            <div class="row">
+                <div class="col"><label>Selecione o Time:</label><select id="selectTime" onchange="alternarTime()"></select></div>
+                <div class="col"><label>Novo Nome do Time:</label><input type="text" id="nomeTimeInput"></div>
+            </div>
+            <button onclick="salvarNomeTime()">Atualizar Nome do Time</button>
+            <hr>
+            <div class="row">
+                <div class="col"><label>Selecione o Membro:</label><select id="selectMembro" onchange="carregarDadosMembro()"></select></div>
+                <div class="col"><label>Novo Nome do Membro:</label><input type="text" id="nomeMembroInput"></div>
+            </div>
+
+            <div class="arma-title">🔫 PISTOLA</div>
+            <div class="row"><div class="col"><label>Acertos</label><input type="number" id="p_acertos" value="0"></div><div class="col"><label>Tempo (s)</label><input type="number" id="p_tempo" value="0" step="0.01"></div><div class="col"><label>Penalidades</label><input type="number" id="p_penalidades" value="0"></div></div>
+
+            <div class="arma-title">💥 CAL. 12</div>
+            <div class="row"><div class="col"><label>Acertos</label><input type="number" id="c_acertos" value="0"></div><div class="col"><label>Tempo (s)</label><input type="number" id="c_tempo" value="0" step="0.01"></div><div class="col"><label>Penalidades</label><input type="number" id="c_penalidades" value="0"></div></div>
+
+            <div class="arma-title">🔫 FUZIL T4</div>
+            <div class="row"><div class="col"><label>Acertos</label><input type="number" id="t_acertos" value="0"></div><div class="col"><label>Tempo (s)</label><input type="number" id="t_tempo" value="0" step="0.01"></div><div class="col"><label>Penalidades</label><input type="number" id="t_penalidades" value="0"></div></div>
+
+            <button onclick="salvarDadosMembro()" class="btn-green">Salvar Dados do Membro</button>
+            <hr>
+            <h2>📊 Relatório</h2>
+            <div class="btn-group">
+                <button onclick="gerarRelatorioImagem()" class="btn-gold">Gerar Imagem</button>
+                <button onclick="gerarRelatorioPDF()">Gerar PDF</button>
+            </div>
+        </div>
+
+        <div>
+            <div class="card" style="margin-bottom: 16px;">
+                <h2>🏆 Ranking de Times</h2>
+                <div class="table-wrapper">
+                    <table><thead><tr><th>Pos</th><th>Time</th><th>Média</th><th>Tempo Total</th></tr></thead><tbody id="rankingTimes"></tbody></table>
+                </div>
+            </div>
+            <div class="card">
+                <h2>🥇 Top 10 Membros</h2>
+                <div class="table-wrapper">
+                    <table><thead><tr><th>Pos</th><th>Membro</th><th>Time</th><th>Média</th><th>Tempo Total</th></tr></thead><tbody id="rankingMembros"></tbody></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="areaRelatorio"></div>
+
+<script>
+    const STORAGE_KEY = 'placarTdC_OP_RR_v2';
+    let dadosEquipes = JSON.parse(localStorage.getItem(STORAGE_KEY)) || Array.from({length: 10}, (_, tIdx) => ({
+        id: tIdx, nome: `Time ${tIdx + 1}`,
+        membros: Array.from({length: 10}, (_, mIdx) => ({ id: mIdx, nome: `Membro ${mIdx + 1}`, pistola: { acertos: 0, tempo: 0, penalidades: 0 }, cal12: { acertos: 0, tempo: 0, penalidades: 0 }, t4: { acertos: 0, tempo: 0, penalidades: 0 } }))
+    }));
+
+    function salvarNoStorage() { localStorage.setItem(STORAGE_KEY, JSON.stringify(dadosEquipes)); }
+    function iniciarSistema() {
+        document.getElementById('selectTime').innerHTML = dadosEquipes.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+        alternarTime(); renderizarRankings();
+    }
+    function alternarTime() {
+        const tId = document.getElementById('selectTime').value;
+        document.getElementById('nomeTimeInput').value = dadosEquipes[tId].nome;
+        document.getElementById('selectMembro').innerHTML = dadosEquipes[tId].membros.map(m => `<option value="${m.id}">${m.nome}</option>`).join('');
+        carregarDadosMembro();
+    }
+    function carregarDadosMembro() {
+        const tId = document.getElementById('selectTime').value; const mId = document.getElementById('selectMembro').value; const membro = dadosEquipes[tId].membros[mId];
+        document.getElementById('nomeMembroInput').value = membro.nome;
+        ['p','c','t'].forEach(prefix => { const arma = prefix === 'p'? 'pistola' : prefix === 'c'? 'cal12' : 't4'; document.getElementById(`${prefix}_acertos`).value = membro[arma].acertos; document.getElementById(`${prefix}_tempo`).value = membro[arma].tempo; document.getElementById(`${prefix}_penalidades`).value = membro[arma].penalidades; });
+    }
+    function salvarNomeTime() { const tId = document.getElementById('selectTime').value; const novoNome = document.getElementById('nomeTimeInput').value.trim(); if(novoNome) { dadosEquipes[tId].nome = novoNome; document.getElementById('selectTime').options[tId].text = novoNome; salvarNoStorage(); renderizarRankings(); } }
+    function salvarDadosMembro() {
+        const tId = document.getElementById('selectTime').value; const mId = document.getElementById('selectMembro').value; const membro = dadosEquipes[tId].membros[mId];
+        const novoNome = document.getElementById('nomeMembroInput').value.trim(); if (novoNome) { membro.nome = novoNome; document.getElementById('selectMembro').options[mId].text = novoNome; }
+        membro.pistola = { acertos: +p_acertos.value, tempo: +p_tempo.value, penalidades: +p_penalidades.value };
+        membro.cal12 = { acertos: +c_acertos.value, tempo: +c_tempo.value, penalidades: +c_penalidades.value };
+        membro.t4 = { acertos: +t_acertos.value, tempo: +t_tempo.value, penalidades: +t_penalidades.value };
+        salvarNoStorage(); renderizarRankings(); alert(`Dados de "${membro.nome}" salvos!`);
+    }
+    function calcularHitFactor(arma) { if (!arma.tempo || arma.tempo <= 0) return 0; const res = (arma.acertos / arma.tempo) - arma.penalidades; return res > 0? res : 0; }
+    function obterDadosMembro(membro) {
+        const media = (calcularHitFactor(membro.pistola) + calcularHitFactor(membro.cal12) + calcularHitFactor(membro.t4)) / 3;
+        const tempoTotal = membro.pistola.tempo + membro.cal12.tempo + membro.t4.tempo;
+        return { media, tempoTotal };
+    }
+    function obterRankings() {
+        let todosMembros = [];
+        const dadosTimesMapeados = dadosEquipes.map(time => {
+            let somaMedia = 0, somaTempo = 0;
+            time.membros.forEach(m => {
+                const dados = obterDadosMembro(m);
+                somaMedia += dados.media;
+                somaTempo += dados.tempoTotal;
+                todosMembros.push({ nome: m.nome, time: time.nome, media: dados.media, tempoTotal: dados.tempoTotal });
+            });
+            return { nome: time.nome, mediaTotal: somaMedia / 10, tempoTotal: somaTempo };
+        });
+        todosMembros.sort((a, b) => b.media - a.media || a.tempoTotal - b.tempoTotal);
+        dadosTimesMapeados.sort((a, b) => b.mediaTotal - a.mediaTotal || a.tempoTotal - b.tempoTotal);
+        return { times: dadosTimesMapeados, membros: todosMembros };
+    }
+    function renderizarRankings() {
+        const { times, membros } = obterRankings();
+        document.getElementById('rankingTimes').innerHTML = times.map((t, idx) => `<tr class="${idx === 0? 'rank-1' : ''}"><td>${idx + 1}º</td><td>${t.nome}</td><td>${t.mediaTotal.toFixed(3)}</td><td>${t.tempoTotal.toFixed(2)}s</td></tr>`).join('');
+        document.getElementById('rankingMembros').innerHTML = membros.slice(0, 10).map((m, idx) => `<tr class="${idx === 0? 'rank-1' : ''}"><td>${idx + 1}º</td><td>${m.nome}</td><td>${m.time}</td><td>${m.media.toFixed(3)}</td><td>${m.tempoTotal.toFixed(2)}s</td></tr>`).join('');
+    }
+    function gerarRelatorioImagem() {
+        const { times, membros } = obterRankings(); const data = new Date().toLocaleDateString('pt-BR'); const area = document.getElementById('areaRelatorio');
+        area.innerHTML = `<div style="background:#0a0f1a; color:white; padding:30px; width:1080px; font-family:Arial;"><div style="text-align:center;"><h1 style="color:#dc2626;">RELATÓRIO TÁTICO - OP PENITENCIÁRIAS RR</h1><p style="color:#94a3b8;">Gerado em: ${data} | Critério: Maior Média > Menor Tempo</p></div><h2 style="color:#dc2626;">RANKING DE TIMES</h2><table style="width:100%; color:white;">${times.map((t, i) => `<tr style="background:${i%2?'#1e293b':'#0a0f1a'}"><td>${i+1}º</td><td>${t.nome}</td><td>${t.mediaTotal.toFixed(3)}</td><td>${t.tempoTotal.toFixed(2)}s</td></tr>`).join('')}</table><h2 style="color:#dc2626; margin-top:30px;">TOP 10 MEMBROS</h2><table style="width:100%; color:white;">${membros.slice(0,10).map((m, i) => `<tr style="background:${i%2?'#1e293b':'#0a0f1a'}"><td>${i+1}º</td><td>${m.nome}</td><td>${m.time}</td><td>${m.media.toFixed(3)}</td><td>${m.tempoTotal.toFixed(2)}s</td></tr>`).join('')}</table></div>`;
+        html2canvas(area).then(canvas => { const link = document.createElement('a'); link.download = `Relatorio_OP_RR_${data.replace(/\//g,'-')}.png`; link.href = canvas.toDataURL('image/png'); link.click(); });
+    }
+    function gerarRelatorioPDF() {
+        const { times, membros } = obterRankings(); const data = new Date().toLocaleDateString('pt-BR');
+        let html = `<h1>RELATÓRIO TÁTICO - OP PENITENCIÁRIAS RR</h1><p>Gerado em: ${data} | Critério de Desempate: Maior Média, depois Menor Tempo Total</p><hr><h2>RANKING DE TIMES</h2><table border="1">`;
+        html += `<tr><th>Pos</th><th>Time</th><th>Média</th><th>Tempo Total</th></tr>`;
+        times.forEach((t,i) => html += `<tr><td>${i+1}º</td><td>${t.nome}</td><td>${t.mediaTotal.toFixed(3)}</td><td>${t.tempoTotal.toFixed(2)}s</td></tr>`);
+        html += `</table><h2>TOP 10 MEMBROS</h2><table border="1">`;
+        html += `<tr><th>Pos</th><th>Membro</th><th>Time</th><th>Média</th><th>Tempo Total</th></tr>`;
+        membros.slice(0,10).forEach((m,i) => html += `<tr><td>${i+1}º</td><td>${m.nome}</td><td>${m.time}</td><td>${m.media.toFixed(3)}</td><td>${m.tempoTotal.toFixed(2)}s</td></tr>`);
+        html += `</table>`;
+        const janela = window.open('', '', 'height=800,width=800'); janela.document.write(`<html><body>${html}</body></html>`); janela.document.close(); janela.print();
+    }
+    window.onload = iniciarSistema;
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</body>
+</html>
