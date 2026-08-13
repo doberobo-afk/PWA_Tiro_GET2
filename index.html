@@ -23,7 +23,7 @@ if('serviceWorker' in navigator){
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0a0a0a; color: #e5e7eb; font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; }
 .header { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: linear-gradient(90deg, #1a1a1a 0%, #222 100%); border-bottom: 3px solid #FFD700; border-radius: 8px; margin-bottom: 15px; }
-.header .alvo-logo { /* CORRIGIDO: tinha espaço aqui */
+.header .alvo-logo {
     width: 55px;
     height: 55px;
     object-fit: contain;
@@ -73,17 +73,17 @@ if('serviceWorker' in navigator){
     <input type="text" id="nomeTime" placeholder="Ex: ALFA">
     <button onclick="addTime()">+ Adicionar Time</button>
     <div id="listaTimes" class="lista"></div>
-    <h3 style="color:#ffd900; margin-top:20px;">Cadastrar Membros</h3>
-    <select id="timeSelectCadastro" onchange="atualizarMembrosCadastro()"></select>
-    <input type="text" id="nomeMembro" placeholder="Ex: Silva">
-    <button onclick="addMembro()">+ Adicionar Membro</button>
-    <div id="listaMembros" class="lista"></div>
+    <h3 style="color:#ffd900; margin-top:20px;">Cadastrar Atiradores</h3>
+    <select id="timeSelectCadastro" onchange="atualizarAtiradoresCadastro()"></select>
+    <input type="text" id="nomeAtirador" placeholder="Ex: Silva">
+    <button onclick="addAtirador()">+ Adicionar Atirador</button>
+    <div id="listaAtiradores" class="lista"></div>
 </div>
 
 <div id="lancar" class="card">
     <h3 style="color:#ffd900;">Lançar Resultado</h3>
-    <label>Time:</label><select id="timeSelectLancar" onchange="atualizarMembrosLancar()"></select>
-    <label>Membro:</label><select id="membroSelectLancar" onchange="carregarPontuacaoArma()"></select>
+    <label>Time:</label><select id="timeSelectLancar" onchange="atualizarAtiradoresLancar()"></select>
+    <label>Atirador:</label><select id="atiradorSelectLancar" onchange="carregarPontuacaoArma()"></select>
     <label>Arma/Modalidade:</label>
     <select id="modalidadeSelect" onchange="carregarPontuacaoArma()">
         <option value="Pistola">Pistola</option>
@@ -130,22 +130,19 @@ let dados = JSON.parse(localStorage.getItem('placarTiroOP_v2')) || {times: []};
 let modoRanking = 'individual';
 
 function salvar() {
-  // 1. Guarda quem estava selecionado
   let timeLancarIdx = document.getElementById('timeSelectLancar').selectedIndex;
-  let membroLancarIdx = document.getElementById('membroSelectLancar').selectedIndex;
+  let atiradorLancarIdx = document.getElementById('atiradorSelectLancar').selectedIndex;
   let timeCadIdx = document.getElementById('timeSelectCadastro').selectedIndex;
 
   localStorage.setItem('placarTiroOP_v2', JSON.stringify(dados));
   atualizarTudo();
 
-  // 2. Restaura os selects
   document.getElementById('timeSelectLancar').selectedIndex = timeLancarIdx;
-  document.getElementById('membroSelectLancar').selectedIndex = membroLancarIdx;
+  document.getElementById('atiradorSelectLancar').selectedIndex = atiradorLancarIdx;
   document.getElementById('timeSelectCadastro').selectedIndex = timeCadIdx;
 
-  // 3. Atualiza listas e recarrega pontuação
-  atualizarMembrosLancar();
-  atualizarMembrosCadastro();
+  atualizarAtiradoresLancar();
+  atualizarAtiradoresCadastro();
   carregarPontuacaoArma();
 }
 
@@ -166,73 +163,73 @@ function addTime() {
   let nome = document.getElementById('nomeTime').value.trim();
   if(!nome) return alert('Digite o nome do time');
   if(dados.times.find(t => t.nome === nome)) return alert('Time já existe');
-  dados.times.push({nome, membros: []});
+  dados.times.push({nome, atiradores: []}); // <-- mudou de membros para atiradores
   document.getElementById('nomeTime').value = '';
   salvar();
 }
 
-function addMembro() {
+function addAtirador() { // <-- mudou de addMembro
   let select = document.getElementById('timeSelectCadastro');
   let tIdx = select.selectedIndex;
-  let nome = document.getElementById('nomeMembro').value.trim();
+  let nome = document.getElementById('nomeAtirador').value.trim(); // <-- mudou id
   if(tIdx < 0) return alert('Cadastre um time primeiro');
-  if(!nome) return alert('Digite o nome do membro');
+  if(!nome) return alert('Digite o nome do atirador'); // <-- mudou texto
   let resultados = {};
   MODALIDADES.forEach(mod => resultados[mod] = {acertos: 0, tempo: 0, penalidades: 0});
-  dados.times[tIdx].membros.push({nome, resultados});
-  document.getElementById('nomeMembro').value = '';
+  dados.times[tIdx].atiradores.push({nome, resultados}); // <-- mudou de membros
+  document.getElementById('nomeAtirador').value = ''; // <-- mudou id
   salvar();
-  select.selectedIndex = tIdx; // Mantém o mesmo time
-  atualizarMembrosCadastro();
+  select.selectedIndex = tIdx;
+  atualizarAtiradoresCadastro(); // <-- mudou função
 }
 
 function hitFactor(a,t,p){let pontos = a - p; return t > 0? (pontos / t) : 0;}
 
 function salvarResultado() {
   let tIdx = document.getElementById('timeSelectLancar').selectedIndex;
-  let mIdx = document.getElementById('membroSelectLancar').selectedIndex;
+  let aIdx = document.getElementById('atiradorSelectLancar').selectedIndex; // <-- mudou
   let mod = document.getElementById('modalidadeSelect').value;
-  if(tIdx < 0 || mIdx < 0) return alert('Selecione time e membro');
-  let m = dados.times[tIdx].membros[mIdx];
-  m.resultados[mod].acertos = parseFloat(document.getElementById('acertos').value) || 0;
-  m.resultados[mod].tempo = parseFloat(document.getElementById('tempo').value) || 0;
-  m.resultados[mod].penalidades = parseFloat(document.getElementById('penalidades').value) || 0;
+  if(tIdx < 0 || aIdx < 0) return alert('Selecione time e atirador'); // <-- mudou texto
+  let a = dados.times[tIdx].atiradores[aIdx]; // <-- mudou
+  a.resultados[mod].acertos = parseFloat(document.getElementById('acertos').value) || 0;
+  a.resultados[mod].tempo = parseFloat(document.getElementById('tempo').value) || 0;
+  a.resultados[mod].penalidades = parseFloat(document.getElementById('penalidades').value) || 0;
   alert(`Resultado salvo para ${mod}!`);
-  salvar(); // agora mantém time e membro
+  salvar();
 }
 
 function atualizarTudo() {
-  document.getElementById('listaTimes').innerHTML = dados.times.map((t,i) => `<div class="item"><span>${t.nome} - ${t.membros.length} membros</span><button onclick="delTime(${i})">X</button></div>`).join('');
+  document.getElementById('listaTimes').innerHTML = dados.times.map((t,i) => `<div class="item"><span>${t.nome} - ${t.atiradores.length} atiradores</span><button onclick="delTime(${i})">X</button></div>`).join(''); // <-- mudou
   let options = dados.times.map(t => `<option>${t.nome}</option>`).join('');
   document.getElementById('timeSelectCadastro').innerHTML = options;
   document.getElementById('timeSelectLancar').innerHTML = options;
 }
 
-function atualizarMembrosCadastro(){
+function atualizarAtiradoresCadastro(){ // <-- mudou
   let tIdx = document.getElementById('timeSelectCadastro').selectedIndex;
   if(tIdx >= 0) {
-    document.getElementById('listaMembros').innerHTML = dados.times[tIdx].membros.map((m,i) => `<div class="item"><span>${m.nome}</span><button onclick="delMembro(${tIdx},${i})">X</button></div>`).join('');
+    document.getElementById('listaAtiradores').innerHTML = dados.times[tIdx].atiradores.map((a,i) => `<div class="item"><span>${a.nome}</span><button onclick="delAtirador(${tIdx},${i})">X</button></div>`).join(''); // <-- mudou
   } else {
-    document.getElementById('listaMembros').innerHTML = '';
+    document.getElementById('listaAtiradores').innerHTML = ''; // <-- mudou
   }
 }
 
-function atualizarMembrosLancar(){
+function atualizarAtiradoresLancar(){ // <-- mudou
   let tIdx = document.getElementById('timeSelectLancar').selectedIndex;
   if(tIdx >= 0) {
-    document.getElementById('membroSelectLancar').innerHTML = dados.times[tIdx].membros.map(m => `<option>${m.nome}</option>`).join('');
+    document.getElementById('atiradorSelectLancar').innerHTML = dados.times[tIdx].atiradores.map(a => `<option>${a.nome}</option>`).join(''); // <-- mudou
     carregarPontuacaoArma();
   } else {
-    document.getElementById('membroSelectLancar').innerHTML = '';
+    document.getElementById('atiradorSelectLancar').innerHTML = ''; // <-- mudou
   }
 }
 
 function carregarPontuacaoArma(){
   let tIdx = document.getElementById('timeSelectLancar').selectedIndex;
-  let mIdx = document.getElementById('membroSelectLancar').selectedIndex;
+  let aIdx = document.getElementById('atiradorSelectLancar').selectedIndex; // <-- mudou
   let mod = document.getElementById('modalidadeSelect').value;
-  if(tIdx >= 0 && mIdx >= 0){
-    let r = dados.times[tIdx].membros[mIdx].resultados[mod];
+  if(tIdx >= 0 && aIdx >= 0){
+    let r = dados.times[tIdx].atiradores[aIdx].resultados[mod]; // <-- mudou
     document.getElementById('acertos').value = r.acertos;
     document.getElementById('tempo').value = r.tempo;
     document.getElementById('penalidades').value = r.penalidades;
@@ -243,25 +240,25 @@ function carregarPontuacaoArma(){
   }
 }
 
-document.getElementById('timeSelectCadastro').onchange = atualizarMembrosCadastro;
+document.getElementById('timeSelectCadastro').onchange = atualizarAtiradoresCadastro; // <-- mudou
 
-function delTime(i) { if(confirm('Apagar time e todos membros?')) { dados.times.splice(i,1); salvar(); } }
-function delMembro(t,i) { if(confirm('Apagar membro?')) { dados.times[t].membros.splice(i,1); salvar(); } }
+function delTime(i) { if(confirm('Apagar time e todos atiradores?')) { dados.times.splice(i,1); salvar(); } } // <-- mudou
+function delAtirador(t,i) { if(confirm('Apagar atirador?')) { dados.times[t].atiradores.splice(i,1); salvar(); } } // <-- mudou
 
 function atualizarRanking() {
   let filtro = document.getElementById('filtroModalidade').value;
   if(modoRanking === 'individual'){
     let lista = [];
     dados.times.forEach(time => {
-      time.membros.forEach(m => {
+      time.atiradores.forEach(a => { // <-- mudou
         if(filtro === "Geral") {
           MODALIDADES.forEach(mod => {
-            let r = m.resultados[mod];
-            lista.push({time: time.nome, nome: m.nome, mod, hf: hitFactor(r.acertos, r.tempo, r.penalidades)});
+            let r = a.resultados[mod];
+            lista.push({time: time.nome, nome: a.nome, mod, hf: hitFactor(r.acertos, r.tempo, r.penalidades)}); // <-- mudou
           })
         } else {
-          let r = m.resultados[filtro];
-          lista.push({time: time.nome, nome: m.nome, mod: filtro, hf: hitFactor(r.acertos, r.tempo, r.penalidades)});
+          let r = a.resultados[filtro];
+          lista.push({time: time.nome, nome: a.nome, mod: filtro, hf: hitFactor(r.acertos, r.tempo, r.penalidades)}); // <-- mudou
         }
       })
     });
@@ -274,33 +271,33 @@ function atualizarRanking() {
     dados.times.forEach(time => {
       let hfTotal = 0;
       let count = 0;
-      time.membros.forEach(m => {
+      time.atiradores.forEach(a => { // <-- mudou
         if(filtro === "Geral") {
           MODALIDADES.forEach(mod => {
-            let r = m.resultados[mod];
+            let r = a.resultados[mod];
             hfTotal += hitFactor(r.acertos, r.tempo, r.penalidades);
             count++;
           })
         } else {
-          let r = m.resultados[filtro];
+          let r = a.resultados[filtro];
           hfTotal += hitFactor(r.acertos, r.tempo, r.penalidades);
           count++;
         }
       });
       let media = count > 0? hfTotal / count : 0;
-      lista.push({nome: time.nome, hf: media, membros: time.membros.length});
+      lista.push({nome: time.nome, hf: media, atiradores: time.atiradores.length}); // <-- mudou
     });
     lista.sort((a,b) => b.hf - a.hf);
     document.getElementById('listaRanking').innerHTML = lista.map((i,idx) =>
-      `<div class="item"><span>${idx+1}. ${i.nome} - ${i.membros} membros</span><b>${i.hf.toFixed(2)}</b></div>`
+      `<div class="item"><span>${idx+1}. ${i.nome} - ${i.atiradores} atiradores</span><b>${i.hf.toFixed(2)}</b></div>` // <-- mudou
     ).join('') || '<p>Nenhum time cadastrado</p>';
   }
 }
 
 function zerarPontos() {
   if(confirm('Zerar só os resultados?')) {
-    dados.times.forEach(t => t.membros.forEach(m => {
-      MODALIDADES.forEach(mod => m.resultados[mod] = {acertos:0, tempo:0, penalidades:0})
+    dados.times.forEach(t => t.atiradores.forEach(a => { // <-- mudou
+      MODALIDADES.forEach(mod => a.resultados[mod] = {acertos:0, tempo:0, penalidades:0}) // <-- mudou
     }));
     salvar();
   }
@@ -318,15 +315,15 @@ function gerarPDF() {
   if(modoRanking === 'individual'){
     let lista = [];
     dados.times.forEach(time => {
-      time.membros.forEach(m => {
+      time.atiradores.forEach(a => { // <-- mudou
         if(filtro === "Geral") {
           MODALIDADES.forEach(mod => {
-            let r = m.resultados[mod];
-            lista.push({time: time.nome, nome: m.nome, mod, hf: hitFactor(r.acertos, r.tempo, r.penalidades)});
+            let r = a.resultados[mod];
+            lista.push({time: time.nome, nome: a.nome, mod, hf: hitFactor(r.acertos, r.tempo, r.penalidades)}); // <-- mudou
           })
         } else {
-          let r = m.resultados[filtro];
-          lista.push({time: time.nome, nome: m.nome, mod: filtro, hf: hitFactor(r.acertos, r.tempo, r.penalidades)});
+          let r = a.resultados[filtro];
+          lista.push({time: time.nome, nome: a.nome, mod: filtro, hf: hitFactor(r.acertos, r.tempo, r.penalidades)}); // <-- mudou
         }
       })
     });
@@ -342,14 +339,14 @@ function gerarPDF() {
     dados.times.forEach(time => {
       let hfTotal = 0;
       let count = 0;
-      time.membros.forEach(m => {
+      time.atiradores.forEach(a => { // <-- mudou
         if(filtro === "Geral") {
           MODALIDADES.forEach(mod => {
-            hfTotal += hitFactor(m.resultados[mod].acertos, m.resultados[mod].tempo, m.resultados[mod].penalidades);
+            hfTotal += hitFactor(a.resultados[mod].acertos, a.resultados[mod].tempo, a.resultados[mod].penalidades); // <-- mudou
             count++;
           })
         } else {
-          let r = m.resultados[filtro];
+          let r = a.resultados[filtro];
           hfTotal += hitFactor(r.acertos, r.tempo, r.penalidades);
           count++;
         }
