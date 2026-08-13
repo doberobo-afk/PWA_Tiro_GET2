@@ -23,7 +23,7 @@ if('serviceWorker' in navigator){
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0a0a0a; color: #e5e7eb; font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; }
 .header { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: linear-gradient(90deg, #1a1a1a 0%, #222 100%); border-bottom: 3px solid #FFD700; border-radius: 8px; margin-bottom: 15px; }
-.header .alvo-logo { /* CORRIGIDO: tinha.header.alvo-logo */
+.header .alvo-logo { /* CORRIGIDO: tinha espaço aqui */
     width: 55px;
     height: 55px;
     object-fit: contain;
@@ -56,7 +56,7 @@ if('serviceWorker' in navigator){
 <body>
 
 <header class="header">
-    <img src="brasao-op.png" alt="Brasao OP" class="alvo-logo">
+    <img src="brasao-op.png" alt="Teste" class="alvo-logo">
     <h1>TORNEIO DE TIRO</h1>
 </header>
 
@@ -130,19 +130,20 @@ let dados = JSON.parse(localStorage.getItem('placarTiroOP_v2')) || {times: []};
 let modoRanking = 'individual';
 
 function salvar() {
-  // Guarda quem estava selecionado antes de atualizar
-  let timeIdx = document.getElementById('timeSelectLancar').selectedIndex;
-  let membroIdx = document.getElementById('membroSelectLancar').selectedIndex;
+  // 1. Guarda quem estava selecionado
+  let timeLancarIdx = document.getElementById('timeSelectLancar').selectedIndex;
+  let membroLancarIdx = document.getElementById('membroSelectLancar').selectedIndex;
   let timeCadIdx = document.getElementById('timeSelectCadastro').selectedIndex;
 
   localStorage.setItem('placarTiroOP_v2', JSON.stringify(dados));
   atualizarTudo();
 
-  // Volta pros mesmos índices
-  document.getElementById('timeSelectLancar').selectedIndex = timeIdx;
-  document.getElementById('membroSelectLancar').selectedIndex = membroIdx;
+  // 2. Restaura os selects
+  document.getElementById('timeSelectLancar').selectedIndex = timeLancarIdx;
+  document.getElementById('membroSelectLancar').selectedIndex = membroLancarIdx;
   document.getElementById('timeSelectCadastro').selectedIndex = timeCadIdx;
 
+  // 3. Atualiza listas e recarrega pontuação
   atualizarMembrosLancar();
   atualizarMembrosCadastro();
   carregarPontuacaoArma();
@@ -181,7 +182,7 @@ function addMembro() {
   dados.times[tIdx].membros.push({nome, resultados});
   document.getElementById('nomeMembro').value = '';
   salvar();
-  select.selectedIndex = tIdx; // Mantém o mesmo time selecionado
+  select.selectedIndex = tIdx; // Mantém o mesmo time
   atualizarMembrosCadastro();
 }
 
@@ -197,7 +198,7 @@ function salvarResultado() {
   m.resultados[mod].tempo = parseFloat(document.getElementById('tempo').value) || 0;
   m.resultados[mod].penalidades = parseFloat(document.getElementById('penalidades').value) || 0;
   alert(`Resultado salvo para ${mod}!`);
-  salvar(); // Salvar agora já mantém tudo
+  salvar(); // agora mantém time e membro
 }
 
 function atualizarTudo() {
