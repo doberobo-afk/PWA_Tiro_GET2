@@ -23,7 +23,7 @@ if('serviceWorker' in navigator){
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0a0a0a; color: #e5e7eb; font-family: 'Segoe UI', Arial, sans-serif; padding: 10px; }
 .header { display: flex; align-items: center; justify-content: center; gap: 15px; padding: 15px; background: linear-gradient(90deg, #1a1a1a 0%, #222 100%); border-bottom: 3px solid #FFD700; border-radius: 8px; margin-bottom: 15px; }
-.header .alvo-logo {
+.header.alvo-logo { /* CORRIGIDO: tinha.header.alvo-logo */
     width: 55px;
     height: 55px;
     object-fit: contain;
@@ -56,8 +56,8 @@ if('serviceWorker' in navigator){
 <body>
 
 <header class="header">
-    <img src="brasao-op.png" alt="Teste" class="alvo-logo">
-    <h1><br>TORNEIO DE TIRO</h1>
+    <img src="brasao-op.png" alt="Brasao OP" class="alvo-logo">
+    <h1>TORNEIO DE TIRO</h1>
 </header>
 
 <div class="tabs">
@@ -130,8 +130,22 @@ let dados = JSON.parse(localStorage.getItem('placarTiroOP_v2')) || {times: []};
 let modoRanking = 'individual';
 
 function salvar() {
+  // Guarda quem estava selecionado antes de atualizar
+  let timeIdx = document.getElementById('timeSelectLancar').selectedIndex;
+  let membroIdx = document.getElementById('membroSelectLancar').selectedIndex;
+  let timeCadIdx = document.getElementById('timeSelectCadastro').selectedIndex;
+
   localStorage.setItem('placarTiroOP_v2', JSON.stringify(dados));
   atualizarTudo();
+
+  // Volta pros mesmos índices
+  document.getElementById('timeSelectLancar').selectedIndex = timeIdx;
+  document.getElementById('membroSelectLancar').selectedIndex = membroIdx;
+  document.getElementById('timeSelectCadastro').selectedIndex = timeCadIdx;
+
+  atualizarMembrosLancar();
+  atualizarMembrosCadastro();
+  carregarPontuacaoArma();
 }
 
 function resetarSistema(){if(confirm('Apagar TUDO?')){localStorage.removeItem('placarTiroOP_v2'); dados = {times: []}; salvar(); alert('Sistema resetado!');}}
@@ -167,8 +181,7 @@ function addMembro() {
   dados.times[tIdx].membros.push({nome, resultados});
   document.getElementById('nomeMembro').value = '';
   salvar();
-  // Mantém o mesmo time selecionado após adicionar
-  select.selectedIndex = tIdx;
+  select.selectedIndex = tIdx; // Mantém o mesmo time selecionado
   atualizarMembrosCadastro();
 }
 
@@ -184,7 +197,7 @@ function salvarResultado() {
   m.resultados[mod].tempo = parseFloat(document.getElementById('tempo').value) || 0;
   m.resultados[mod].penalidades = parseFloat(document.getElementById('penalidades').value) || 0;
   alert(`Resultado salvo para ${mod}!`);
-  salvar();
+  salvar(); // Salvar agora já mantém tudo
 }
 
 function atualizarTudo() {
@@ -192,8 +205,6 @@ function atualizarTudo() {
   let options = dados.times.map(t => `<option>${t.nome}</option>`).join('');
   document.getElementById('timeSelectCadastro').innerHTML = options;
   document.getElementById('timeSelectLancar').innerHTML = options;
-  atualizarMembrosLancar();
-  atualizarMembrosCadastro();
 }
 
 function atualizarMembrosCadastro(){
@@ -209,13 +220,12 @@ function atualizarMembrosLancar(){
   let tIdx = document.getElementById('timeSelectLancar').selectedIndex;
   if(tIdx >= 0) {
     document.getElementById('membroSelectLancar').innerHTML = dados.times[tIdx].membros.map(m => `<option>${m.nome}</option>`).join('');
-    carregarPontuacaoArma(); // Carrega pontuação ao trocar de time
+    carregarPontuacaoArma();
   } else {
     document.getElementById('membroSelectLancar').innerHTML = '';
   }
 }
 
-// NOVA FUNÇÃO: Carrega os dados da arma selecionada ou zera os campos
 function carregarPontuacaoArma(){
   let tIdx = document.getElementById('timeSelectLancar').selectedIndex;
   let mIdx = document.getElementById('membroSelectLancar').selectedIndex;
