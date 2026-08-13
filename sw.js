@@ -5,7 +5,7 @@ const urlsToCache = [
   '/manifest.json',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',
-  '/brasao-op.png.png'
+  '/brasao-op.png'
 ];
 
 self.addEventListener('install', event => {
