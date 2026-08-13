@@ -21,3 +21,11 @@ self.addEventListener('fetch', event => {
       .then(response => response || fetch(event.request))
   );
 });
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
+
+// Avisa o app que tem update
+self.addEventListener('message', event => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
+});
